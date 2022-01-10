@@ -1,0 +1,30 @@
+subcount=$(az account list --query [].name |jq '. |length')
+
+num=0
+while [ $num -lt $subcount ]
+do
+subname=$(az account list --query [${num}].id -o tsv)
+
+subname1=$(az account list --query [${num}].name -o tsv)
+
+az account set --subscription $subname
+echo "$subname1"
+count=$(az group list --subscription $subname --query [].name | jq '. | length')
+number=0
+while [ $number -lt $count ]
+
+do
+
+name=$(az group list --subscription $subname --query [${number}].name -o tsv)
+
+echo "
+Resource Group Name=    $name
+"
+az resource list --resource-group $name --query "[].{ResourceName:name, Type:type,CreationDate:createdTime}" --output table
+
+number=$(( number+1))
+done
+
+num=$((num+1))
+
+done
